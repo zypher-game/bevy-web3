@@ -1,0 +1,9 @@
+[package]
+name = "bevy-wallet"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+async-channel = "2.1"
+bevy = { version = "0.12", default-features = false }
+web3 = { version = "0.19", default-features = false, features = ["wasm", "eip-1193"] }
