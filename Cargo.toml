@@ -2,6 +2,11 @@
 name = "bevy-web3"
 version = "0.1.0"
 edition = "2021"
+authors = ["Neo <huachuang20@gmail.com>"]
+readme = "README.md"
+description = "Eth web3 plugin for Bevy game engine."
+keywords = ["web3", "bevy"]
+license = "MIT/Apache-2.0"
 
 [dependencies]
 async-channel = "2.1"

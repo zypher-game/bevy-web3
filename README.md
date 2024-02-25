@@ -1,4 +1,4 @@
-# bevy-wallet
+# bevy-web3
 ETH Wallet plugin for Bevy game engine
 
 ## Features
