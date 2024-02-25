@@ -11,4 +11,5 @@ license = "MIT/Apache-2.0"
 [dependencies]
 async-channel = "2.1"
 bevy = { version = "0.13", default-features = false }
+chamomile_types = "0.10"
 web3 = { version = "0.19", default-features = false, features = ["wasm", "eip-1193"] }
