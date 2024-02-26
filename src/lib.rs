@@ -39,16 +39,16 @@ impl Plugin for WalletPlugin {
 
 #[derive(Resource)]
 pub struct EthWallet {
-    accounts: Vec<H160>,
-    chain_id: u64,
+    pub accounts: Vec<H160>,
+    pub chain_id: u64,
     account_tx: Sender<(Vec<H160>, u64)>,
     account_rx: Receiver<(Vec<H160>, u64)>,
     signature_tx: Sender<H520>,
     signature_rx: Receiver<H520>,
     transaction_tx: Sender<H256>,
     transaction_rx: Receiver<H256>,
-    call_tx: Sender<Vec<u8>>,
-    call_rx: Receiver<Vec<u8>>,
+    call_tx: Sender<(String, Vec<u8>)>,
+    call_rx: Receiver<(String, Vec<u8>)>,
 }
 
 fn init_eth_wallet(mut commands: Commands) {
@@ -128,7 +128,7 @@ impl EthWallet {
             .detach();
     }
 
-    pub fn call(&self, to: H160, data: Vec<u8>) {
+    pub fn call(&self, to: H160, method: String, data: Vec<u8>) {
         let tx = self.call_tx.clone();
         IoTaskPool::get_or_init(TaskPool::new)
             .spawn(async move {
@@ -139,9 +139,9 @@ impl EthWallet {
                 let mut call = CallRequest::default();
                 call.to = Some(to);
                 call.data = Some(data.into());
-
                 let bytes = web3.eth().call(call, None).await.unwrap();
-                let _ = tx.send(bytes.0).await;
+
+                let _ = tx.send((method, bytes.0)).await;
             })
             .detach();
     }
@@ -163,17 +163,27 @@ impl EthWallet {
         Ok(self.transaction_rx.try_recv()?)
     }
 
-    pub fn recv_call(&self) -> Result<Vec<u8>, RecvError> {
+    pub fn recv_call(&self) -> Result<(String, Vec<u8>), RecvError> {
         Ok(self.call_rx.try_recv()?)
     }
 }
 
+#[derive(Default)]
 pub struct Contract {
     pub address: H160,
     abi: EthContract,
 }
 
 impl Contract {
+    pub fn is_empty(&self) -> bool {
+        self.address == H160::default()
+    }
+
+    pub fn address(&self) -> String {
+        let addr = PeerId(self.address.to_fixed_bytes());
+        addr.to_hex()
+    }
+
     pub fn load(address: &str, json: &[u8]) -> Self {
         let address = address.parse().unwrap();
         let abi = EthContract::load(json).unwrap();
